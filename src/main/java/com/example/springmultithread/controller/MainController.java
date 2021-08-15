@@ -16,7 +16,7 @@ public class MainController {
     @Autowired
     Crawler crawler;
     @GetMapping("/crawl")
-    public DeferredResult<CrawlResult> crawl(@RequestParam String url, @RequestParam String word) throws InterruptedException {
+    public DeferredResult<CrawlResult> crawl(@RequestParam String url, @RequestParam String word) {
         DeferredResult<CrawlResult> defer = new DeferredResult<>();
         ForkJoinPool pool = new ForkJoinPool();
         pool.execute(()->{
