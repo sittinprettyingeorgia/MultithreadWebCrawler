@@ -53,6 +53,10 @@ public class Crawler{
     }
     //TODO multithreaded search method (IT WORKS!!)
     public void search(String url, String searchItem){
+        System.out.println("now searching: "+url+" for word: "+searchItem);
+        this.pagesVisited.clear();
+        this.pageQueue.clear();
+        this.count.set(0);
 
         for(int i=0; i<threads;i++) {
             execService.submit(() -> {
