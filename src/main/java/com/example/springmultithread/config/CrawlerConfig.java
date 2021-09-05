@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @ComponentScan
 public class CrawlerConfig {
-    //TODO declare beans
+    //declare beans
 
     @Bean
     public Crawler crawler(){
