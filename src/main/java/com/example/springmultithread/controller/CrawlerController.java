@@ -1,5 +1,7 @@
 package com.example.springmultithread.controller;
 
+import com.example.springmultithread.helpers.CrawlerControllerException;
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -9,62 +11,73 @@ import org.springframework.stereotype.Controller;
 
 import java.util.ArrayList;
 
-
+/**
+ * Controls HTTP interactions with Rest API crawler service.
+ * .
+ * Shared thread-safe Class that contains multithreaded classes internally.
+ *
+ */
 @Controller
 public class CrawlerController {
 
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.1" +
             " (KHTML, like Gecko) Chrome/13.0.782.112 Safari/535.1";
-    private String htmlDoc = "";
+    protected String htmlDoc = "";
+
     public CrawlerController() {
     }
 
-    public boolean wordSearch(String word){
-        if(this.htmlDoc == null){
-            System.out.println("ERROR: crawl() failed to initiate HTMLDOC.");
-        }
+    /**
+     * Searches a webpage by converting HTML into string and checking if string contains a word.
+     * @param word
+     * @return boolean result
+     */
+    public boolean wordSearch(String word) throws CrawlerControllerException {
 
-        System.out.println("searching for " + word + ".");
+        if (this.htmlDoc == null) throw new CrawlerControllerException("ERROR: crawl() failed to initiate HTMLDOC.");
 
-        synchronized (this.htmlDoc){
-            boolean res = htmlDoc.toLowerCase().contains(word.toLowerCase());
-            htmlDoc = "";
-            return res;
-        }
+        boolean res = htmlDoc.toLowerCase().contains(word.toLowerCase());
+        htmlDoc = "";
+        return res;
+
     }
 
-    public ArrayList<String> crawl(String url,String word){
+    /**
+     * Crawls the current page and retrieves all of its links.
+     *
+     * @param url
+     * @return An ArrayList<String> containging all of the url links on a webpage.
+     */
+    public ArrayList<String> crawl(String url) throws CrawlerControllerException {
             ArrayList<String> links = new ArrayList<>();
             if (url == null || url.isEmpty()) return links;
+            if(!url.matches("https://.*\\.[a-zA-Z0-9]*\\.com.*|http://.*\\.[a-zA-Z0-9]*\\.com.*"))
+                throw new CrawlerControllerException("**Malformed URl: url needs to be in format (https://www.walmart.com)" +
+                        "or http://www.walmart.com");
 
             try {
                 Connection connection = Jsoup.connect(url).userAgent(USER_AGENT);
                 Document htmlDoc = connection.get();
-                if (connection.response().statusCode() == 200) // 200 is the HTTP OK status code
-                // indicating that everything is great.
-                {
-                    System.out.println("\n**Visiting** Received web page at " + url);
-                }
-                if (!connection.response().contentType().contains("text/html")) {
-                    System.out.println("**Failure** Retrieved something other than HTML");
 
-                }
-
-                System.out.println("recieved webpage " + url);
+                if (!connection.response().contentType().contains("text/html"))
+                    throw new CrawlerControllerException("**Failure** Retrieved something other than HTML");
 
 
                 Elements linksOnPage = htmlDoc.select("a[href]");
-                System.out.println("found " + linksOnPage.size() + " links");
                 for (Element link : linksOnPage) {
-                    links.add(link.absUrl("href"));
+                    String temp = link.absUrl("href");
+                    if(temp.matches("https://.*\\.[a-zA-Z0-9]*\\.com.*|http://.*\\.[a-zA-Z0-9]*\\.com.*")) {
+                        links.add(temp);
+                    }
                 }
-                synchronized (this.htmlDoc){
-                    this.htmlDoc += htmlDoc;
-                }
+                this.htmlDoc += htmlDoc;
 
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println("ERROR: processing page.");
+                if(e instanceof CrawlerControllerException)throw new CrawlerControllerException("**Failure** Retrieved something other than HTML");
+                else {
+                    throw new CrawlerControllerException("**Failure: "+e.getClass());
+                }
             }
             return links;
     }

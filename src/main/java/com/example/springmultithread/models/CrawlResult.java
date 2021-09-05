@@ -1,8 +1,10 @@
 package com.example.springmultithread.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.springframework.stereotype.Component;
 
+/**
+ * Result of visiting the '/crawl/' path which holds the Integer number of matches found for the search word.
+ */
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class CrawlResult {
 

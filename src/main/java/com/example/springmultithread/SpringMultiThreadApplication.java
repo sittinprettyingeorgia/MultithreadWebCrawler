@@ -1,20 +1,25 @@
 package com.example.springmultithread;
 
+import com.amazonaws.services.rds.AmazonRDS;
+import com.amazonaws.services.rds.AmazonRDSClient;
 import com.example.springmultithread.config.MainConfig;
-import com.example.springmultithread.webCrawl.Crawler;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+
 @SpringBootApplication
 public class SpringMultiThreadApplication {
 
+
     public static void main(String[] args) {
         ApplicationContext context = new AnnotationConfigApplicationContext(MainConfig.class);
-        /*Crawler crawler = context.getBean("crawler", Crawler.class);
-        crawler.search("https://www.walmart.com/", "the");*/
-
+        /*AmazonRDSClient client = (AmazonRDSClient) context.getBean("amazonRds", AmazonRDS.class);
+        String res = client.describeDBInstances().toString();*/
         SpringApplication.run(SpringMultiThreadApplication.class, args);
     }
 
